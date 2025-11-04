@@ -1,0 +1,63 @@
+<section class="inner">
+  <header class="major"><h2>Adatbázis – Tanösvények</h2></header>
+
+  <form method="get" class="filters">
+    <div class="row gtr-uniform">
+      <div class="col-4 col-12-small">
+        <label>Nemzeti park</label>
+        <select name="np">
+          <option value="">-- mind --</option>
+          <% nps.forEach(n => { %>
+            <option value="<%= n.np_nev %>" <%= (filters.np===n.np_nev?'selected':'') %>><%= n.np_nev %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="col-4 col-12-small">
+        <label>Település</label>
+        <select name="telepules">
+          <option value="">-- mind --</option>
+          <% telepulesek.forEach(t => { %>
+            <option value="<%= t.telepules_nev %>" <%= (filters.telepules===t.telepules_nev?'selected':'') %>><%= t.telepules_nev %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="col-4 col-12-small">
+        <label>Vezetés</label>
+        <select name="vezetes">
+          <option value="">-- mind --</option>
+          <option value="van" <%= (filters.vezetes==='van'?'selected':'') %>>van</option>
+          <option value="nincs" <%= (filters.vezetes==='nincs'?'selected':'') %>>nincs</option>
+        </select>
+      </div>
+    </div>
+    <br />
+    <ul class="actions">
+      <li><button type="submit" class="button primary">Szűrés</button></li>
+      <li><a href="/adatbazis" class="button">Szűrők törlése</a></li>
+    </ul>
+  </form>
+
+  <div class="table-wrapper">
+    <table class="alt">
+      <thead>
+        <tr>
+          <th>Név</th><th>Település</th><th>Nemzeti park</th>
+          <th>Hossz (km)</th><th>Állomás</th><th>Idő (óra)</th><th>Vezetés</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% utak.forEach(u => { %>
+          <tr>
+            <td><%= u.ut_nev %></td>
+            <td><%= u.telepules_nev %></td>
+            <td><%= u.np_nev %></td>
+            <td><%= u.hossz ?? '' %></td>
+            <td><%= u.allomas ?? '' %></td>
+            <td><%= u.ido ?? '' %></td>
+            <td><%= u.vezetes %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</section>

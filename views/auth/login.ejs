@@ -1,0 +1,17 @@
+<section class="inner">
+  <header class="major"><h2>Bejelentkezés</h2></header>
+  <form method="post" action="/login">
+    <input type="hidden" name="next" value="<%= next %>">
+    <div class="row gtr-uniform">
+      <div class="col-6 col-12-xsmall">
+        <label>E-mail</label><input type="email" name="email" required />
+      </div>
+      <div class="col-6 col-12-xsmall">
+        <label>Jelszó</label><input type="password" name="password" required />
+      </div>
+      <div class="col-12">
+        <ul class="actions"><li><button class="button primary" type="submit">Belépek</button></li></ul>
+      </div>
+    </div>
+  </form>
+</section>

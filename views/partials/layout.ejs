@@ -1,0 +1,136 @@
+<!DOCTYPE HTML>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+  <title><%= typeof title !== 'undefined' ? title : 'Tanösvény' %></title>
+  <link rel="stylesheet" href="/assets/css/main.css" />
+
+  <style>
+    header#header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: nowrap;
+      padding: 15px 20px !important;
+      background: #242943;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 2000;
+    }
+
+    .left-block {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+    }
+
+    .user-block {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+
+    .user-block a,
+    .user-block button {
+      padding: 6px 14px;
+      font-size: 0.9rem;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    #main {
+      padding-top: 110px !important;
+    }
+
+    @media (max-width: 736px) {
+      header#header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .left-block {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .user-block {
+        flex-wrap: wrap;
+        gap: 0.4rem;
+      }
+
+      #main {
+        padding-top: 150px !important;
+      }
+    }
+  </style>
+
+  <noscript><link rel="stylesheet" href="/assets/css/noscript.css" /></noscript>
+</head>
+
+<body class="is-preload">
+  <div id="wrapper">
+
+    <header id="header">
+      <div class="left-block">
+        <nav class="main-nav"><a href="#menu" class="menuToggle">Menü</a></nav>
+
+        <div class="user-block">
+          <% if (currentUser) { %>
+            <span>Belépve: <strong><%= currentUser.name %></strong> (<%= currentUser.role %>)</span>
+            <form action="/logout" method="post" style="display:inline;">
+              <button type="submit" class="button primary small">Kijelentkezés</button>
+            </form>
+          <% } else { %>
+            <a href="/login" class="button small">Bejelentkezés</a>
+            <a href="/register" class="button small">Regisztráció</a>
+          <% } %>
+        </div>
+      </div>
+
+      <a href="/" class="logo"><strong>Tanösvény</strong> <span>projekt</span></a>
+    </header>
+
+    <nav id="menu">
+      <ul class="links">
+        <li><a href="/">Főoldal</a></li>
+        <li><a href="/adatbazis">Adatbázis</a></li>
+        <li><a href="/kapcsolat">Kapcsolat</a></li>
+        <% if (currentUser) { %>
+          <li><a href="/uzenetek">Üzenetek</a></li>
+        <% } %>
+        <li><a href="/crud/ut">CRUD</a></li>
+        <% if (currentUser && currentUser.role === 'admin') { %>
+          <li><a href="/admin">Admin</a></li>
+        <% } %>
+      </ul>
+    </nav>
+
+    <div id="main">
+      <section id="content" class="inner">
+        <%- body %>
+      </section>
+    </div>
+
+    <footer id="footer">
+      <div class="inner">
+        <ul class="copyright">
+          <li>Tanösvény – Web2 beadandó</li>
+          <li>Készítette: Sallai Norbert, Rózsavári Zsolt</li>
+        </ul>
+      </div>
+    </footer>
+
+  </div>
+
+  <script src="/assets/js/jquery.min.js"></script>
+  <script src="/assets/js/jquery.scrolly.min.js"></script>
+  <script src="/assets/js/jquery.scrollex.min.js"></script>
+  <script src="/assets/js/browser.min.js"></script>
+  <script src="/assets/js/breakpoints.min.js"></script>
+  <script src="/assets/js/util.js"></script>
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

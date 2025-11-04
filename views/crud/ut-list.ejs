@@ -1,0 +1,29 @@
+<section class="inner">
+  <header class="major"><h2>Útvonalak (CRUD)</h2></header>
+  <p><a href="/crud/ut/new" class="button primary">+ Új út hozzáadása</a></p>
+  <div class="table-wrapper">
+    <table class="alt">
+      <thead>
+        <tr><th>Név</th><th>Hossz</th><th>Állomás</th><th>Idő</th><th>Vezetés</th><th>Település</th><th>Műveletek</th></tr>
+      </thead>
+      <tbody>
+        <% utak.forEach(u => { %>
+          <tr>
+            <td><%= u.nev %></td>
+            <td><%= u.hossz ?? '' %></td>
+            <td><%= u.allomas ?? '' %></td>
+            <td><%= u.ido ?? '' %></td>
+            <td><%= (u.vezetes === 1 ? 'van' : 'nincs') %></td>
+            <td><%= u.telepules_nev %></td>
+            <td>
+              <a href="/crud/ut/<%= u.id %>/edit" class="button small">Szerkesztés</a>
+              <form action="/crud/ut/<%= u.id %>?_method=DELETE" method="post" style="display:inline;">
+                <button type="submit" class="button small" onclick="return confirm('Biztosan törlöd?')">Törlés</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</section>

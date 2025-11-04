@@ -1,0 +1,28 @@
+<section class="inner">
+  <header class="major"><h2>Beérkezett üzenetek</h2></header>
+  <div class="table-wrapper">
+    <table class="alt">
+      <thead>
+        <tr>
+          <th>Küldés ideje</th>
+          <th>Név</th>
+          <th>E-mail</th>
+          <th>Üzenet</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (msgs.length === 0) { %>
+          <tr><td colspan="4">Nincs még üzenet.</td></tr>
+        <% } %>
+        <% msgs.forEach(m => { %>
+          <tr>
+            <td><%= m.sent_at %></td>
+            <td><%= m.name %></td>
+            <td><%= m.email %></td>
+            <td><%= m.message %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</section>

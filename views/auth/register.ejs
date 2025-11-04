@@ -1,0 +1,49 @@
+<section class="inner">
+  <header class="major"><h2>Regisztráció</h2></header>
+
+  <% if (typeof success !== 'undefined') { %>
+    <div id="successBox" style="
+      padding: 12px;
+      background: #4CAF50;
+      color: white;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      font-weight: bold;
+      font-size: 1rem;
+    ">
+      ✅ <%= success %>
+    </div>
+
+    <script>
+      setTimeout(() => {
+        const box = document.getElementById('successBox');
+        if (box) box.style.display = 'none';
+      }, 3000);
+    </script>
+  <% } %>
+
+  <form method="post" action="/register">
+    <div class="row gtr-uniform">
+      <div class="col-6 col-12-xsmall">
+        <label>Név</label>
+        <input type="text" name="name" required />
+      </div>
+
+      <div class="col-6 col-12-xsmall">
+        <label>E-mail</label>
+        <input type="email" name="email" required />
+      </div>
+
+      <div class="col-12">
+        <label>Jelszó</label>
+        <input type="password" name="password" required />
+      </div>
+
+      <div class="col-12">
+        <ul class="actions">
+          <li><button class="button primary" type="submit">Regisztrálok</button></li>
+        </ul>
+      </div>
+    </div>
+  </form>
+</section>
