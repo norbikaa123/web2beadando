@@ -1,0 +1,21 @@
+{
+  "name": "web2-tanosveny",
+  "version": "2.0.0",
+  "type": "module",
+  "description": "Web-Programozás II beadandó – Tanösvény (Express + EJS + SQLite, Forty theme, final)",
+  "main": "indito.js",
+  "scripts": {
+    "start": "node indito.js",
+    "dev": "NODE_ENV=development node indito.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "express-ejs-layouts": "^2.5.1",
+    "express-session": "^1.17.3",
+    "method-override": "^3.0.0",
+    "sqlite": "^4.2.1",
+    "sqlite3": "^5.1.7"
+  }
+}
