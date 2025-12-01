@@ -7,72 +7,98 @@ import { openDb } from './db.js';
 import { ensureAuth, ensureAdmin } from './auth.js';
 
 const app = express();
+const BASE = '/app156';
 const PORT = process.env.PORT || 4156;
 
+/* ---------- STATIC ---------- */
+app.use(BASE + '/public', express.static('public'));
+
+/* ---------- EJS + Layout ---------- */
 app.set('view engine', 'ejs');
 app.use(expressLayouts);
 app.set('layout', 'partials/layout');
 
-app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'change-this-in-production',
-  resave: false,
-  saveUninitialized: false,
-  cookie: { maxAge: 1000 * 60 * 60 * 2 }
-}));
+/* ---------- SESSION ---------- */
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || 'change-this-in-production',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { maxAge: 1000 * 60 * 60 * 2 },
+  })
+);
 
 app.use((req, res, next) => {
   res.locals.currentUser = req.session.user || null;
-  if (typeof res.locals.title === 'undefined') res.locals.title = 'TanÃ¶svÃ©ny';
+  res.locals.title = res.locals.title || 'Tanösvény';
   next();
 });
 
-// ---- Home
-app.get('/', (req, res) => {
-  res.render('index', { title: 'TanÃ¶svÃ©ny â€“ FÅ‘oldal' });
+/* ---------- ROUTES ---------- */
+
+// Home
+app.get(BASE + '/', (req, res) => {
+  res.render('index', { title: 'Tanösvény – Fõoldal' });
 });
 
-// ---- AdatbÃ¡zis lista
-app.get('/adatbazis', async (req, res) => {
+// Adatbázis
+app.get(BASE + '/adatbazis', async (req, res) => {
   const db = await openDb();
   const { np, telepules, vezetes } = req.query;
 
   let sql = `
-    SELECT id, ut_nev, hossz, allomas, ido, 
+    SELECT id, ut_nev, hossz, allomas, ido,
            CASE WHEN vezetes=1 THEN 'van' ELSE 'nincs' END AS vezetes,
            telepules_nev, np_nev
     FROM v_ut_reszletes
     WHERE 1=1
   `;
   const params = [];
+
   if (np) { sql += ' AND np_nev = ?'; params.push(np); }
   if (telepules) { sql += ' AND telepules_nev = ?'; params.push(telepules); }
   if (vezetes === 'van') { sql += ' AND vezetes = 1'; }
   if (vezetes === 'nincs') { sql += ' AND vezetes = 0'; }
+
   sql += ' ORDER BY ut_nev';
 
-  const rows = await db.all(sql, params);
+  const utak = await db.all(sql, params);
   const nps = await db.all('SELECT DISTINCT np_nev FROM v_ut_reszletes ORDER BY np_nev');
   const telepulesek = await db.all('SELECT DISTINCT telepules_nev FROM v_ut_reszletes ORDER BY telepules_nev');
 
-  res.render('adatbazis', { title: 'TanÃ¶svÃ©ny â€“ AdatbÃ¡zis', utak: rows, nps, telepulesek, filters: { np, telepules, vezetes } });
+  res.render('adatbazis', {
+    title: 'Tanösvény – Adatbázis',
+    utak,
+    nps,
+    telepulesek,
+    filters: { np, telepules, vezetes },
+  });
 });
 
-// ---- Kapcsolat
-app.get('/kapcsolat', (req, res) => res.render('kapcsolat', { title: 'TanÃ¶svÃ©ny â€“ Kapcsolat' }));
-app.post('/kapcsolat', async (req, res) => {
+// Kapcsolat
+app.get(BASE + '/kapcsolat', (req, res) => {
+  res.render('kapcsolat', { title: 'Tanösvény – Kapcsolat' });
+});
+
+app.post(BASE + '/kapcsolat', async (req, res) => {
   const { name, email, message } = req.body;
-  if (!name || !email || !message) return res.status(400).send('Minden mezÅ‘ kÃ¶telezÅ‘.');
+  if (!name || !email || !message) {
+    return res.status(400).send('Minden mezõ kötelezõ.');
+  }
   const db = await openDb();
-  await db.run('INSERT INTO messages (name, email, message) VALUES (?, ?, ?)', [name, email, message]);
-  res.render('kapcsolat-siker', { title: 'Ãœzenet elkÃ¼ldve â€“ TanÃ¶svÃ©ny' });
+  await db.run('INSERT INTO messages (name, email, message) VALUES (?, ?, ?)', [
+    name,
+    email,
+    message,
+  ]);
+  res.render('kapcsolat-siker', { title: 'Üzenet elküldve – Tanösvény' });
 });
 
-// ---- Ãœzenetek (csak belÃ©pve) + dÃ¡tum formÃ¡zÃ¡s
-app.get('/uzenetek', ensureAuth, async (req, res) => {
+// Üzenetek
+app.get(BASE + '/uzenetek', ensureAuth, async (req, res) => {
   const db = await openDb();
   const msgs = await db.all(`
     SELECT id, name, email, message, created_at
@@ -80,118 +106,189 @@ app.get('/uzenetek', ensureAuth, async (req, res) => {
     ORDER BY created_at DESC
   `);
 
-  msgs.forEach(m => {
-    const formatDate = (val) => {
-      if (val == null) return '';
-      let dt = null;
-      if (typeof val === 'number') {
-        dt = new Date(val);
-      } else {
-        const s = String(val);
-        dt = new Date(s.includes(' ') ? s.replace(' ', 'T') : s);
-        if (isNaN(dt.getTime())) {
-          const n = Number(s);
-          dt = isNaN(n) ? null : new Date(n);
-        }
-      }
-      return dt ? dt.toLocaleString('hu-HU', { dateStyle: 'short', timeStyle: 'short' }) : '';
-    };
-
-    const formatted = formatDate(m.created_at);
-    m.sent_at = formatted;                 
-    m.created_at_formatted = formatted;   
+  msgs.forEach((m) => {
+    const dt = new Date(m.created_at);
+    m.created_at_formatted = dt.toLocaleString('hu-HU', {
+      dateStyle: 'short',
+      timeStyle: 'short',
+    });
   });
 
-  res.render('uzenetek', { title: 'TanÃ¶svÃ©ny â€“ Ãœzenetek', msgs });
+  res.render('uzenetek', {
+    title: 'Tanösvény – Üzenetek',
+    msgs,
+  });
 });
 
-// ---- Auth
-app.get('/register', (req, res) => res.render('auth/register', { title: 'RegisztrÃ¡ciÃ³ â€“ TanÃ¶svÃ©ny' }));
-app.post('/register', async (req, res) => {
+// Auth
+app.get(BASE + '/register', (req, res) => {
+  res.render('auth/register', { title: 'Regisztráció – Tanösvény' });
+});
+
+app.post(BASE + '/register', async (req, res) => {
   const { name, email, password } = req.body;
-  if (!name || !email || !password) return res.status(400).send('HiÃ¡nyzÃ³ adatok.');
+  if (!name || !email || !password)
+    return res.status(400).send('Hiányzó adatok.');
+
   const db = await openDb();
   const exists = await db.get('SELECT id FROM users WHERE email = ?', email);
-  if (exists) return res.status(400).send('Ezzel az emaillel mÃ¡r lÃ©tezik fiÃ³k.');
+
+  if (exists) return res.status(400).send('Már van ilyen emaillel fiók.');
+
   const hash = await bcrypt.hash(password, 10);
-  await db.run('INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, ?)', [name, email, hash, 'registered']);
-  res.redirect('/login');
+  await db.run(
+    'INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, ?)',
+    [name, email, hash, 'registered']
+  );
+
+  res.redirect(BASE + '/login');
 });
 
-app.get('/login', (req, res) => res.render('auth/login', { title: 'BejelentkezÃ©s â€“ TanÃ¶svÃ©ny', next: req.query.next || '/' }));
-app.post('/login', async (req, res) => {
+app.get(BASE + '/login', (req, res) => {
+  res.render('auth/login', {
+    title: 'Bejelentkezés – Tanösvény',
+    next: req.query.next || BASE + '/',
+  });
+});
+
+app.post(BASE + '/login', async (req, res) => {
   const { email, password, next } = req.body;
+
   const db = await openDb();
   const user = await db.get('SELECT * FROM users WHERE email = ?', email);
-  if (!user) return res.status(400).send('HibÃ¡s bejelentkezÃ©s.');
+
+  if (!user) return res.status(400).send('Hibás bejelentkezés.');
+
   const ok = await bcrypt.compare(password, user.password_hash);
-  if (!ok) return res.status(400).send('HibÃ¡s bejelentkezÃ©s.');
-  req.session.user = { id: user.id, name: user.name, email: user.email, role: user.role };
-  res.redirect(next || '/');
+  if (!ok) return res.status(400).send('Hibás bejelentkezés.');
+
+  req.session.user = {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+  };
+
+  res.redirect(next || BASE + '/');
 });
 
-app.post('/logout', (req, res) => req.session.destroy(() => res.redirect('/')));
+app.post(BASE + '/logout', (req, res) => {
+  req.session.destroy(() => {
+    res.redirect(BASE + '/');
+  });
+});
 
-// ---- Admin
-app.get('/admin', ensureAdmin, (req, res) => res.render('admin', { title: 'Admin â€“ TanÃ¶svÃ©ny' }));
+// Admin
+app.get(BASE + '/admin', ensureAdmin, (req, res) => {
+  res.render('admin', {
+    title: 'Admin – Tanösvény',
+  });
+});
 
-// ---- CRUD - ut
-app.get('/crud/ut', ensureAuth, async (req, res) => {
+// CRUD UT list
+app.get(BASE + '/crud/ut', ensureAuth, async (req, res) => {
   const db = await openDb();
-  const rows = await db.all(`
+  const utak = await db.all(`
     SELECT u.id, u.nev, u.hossz, u.allomas, u.ido, u.vezetes,
            t.nev AS telepules_nev
     FROM ut u
     JOIN telepules t ON t.id = u.telepulesid
     ORDER BY u.nev;
   `);
-  res.render('crud/ut-list', { title: 'Ãštvonalak (CRUD) â€“ TanÃ¶svÃ©ny', utak: rows });
+
+  res.render('crud/ut-list', {
+    title: 'Útvonalak – Tanösvény',
+    utak,
+  });
 });
 
-app.get('/crud/ut/new', ensureAuth, async (req, res) => {
+// CRUD new
+app.get(BASE + '/crud/ut/new', ensureAuth, async (req, res) => {
   const db = await openDb();
-  const telepulesek = await db.all('SELECT id, nev FROM telepules ORDER BY nev');
-  res.render('crud/ut-form', { title: 'Ãšj Ãºt hozzÃ¡adÃ¡sa â€“ TanÃ¶svÃ©ny', ut: null, telepulesek });
+  const telepulesek = await db.all(
+    'SELECT id, nev FROM telepules ORDER BY nev'
+  );
+
+  res.render('crud/ut-form', {
+    title: 'Új út hozzáadása – Tanösvény',
+    ut: null,
+    telepulesek,
+  });
 });
 
-app.post('/crud/ut', ensureAuth, async (req, res) => {
+// CRUD create
+app.post(BASE + '/crud/ut', ensureAuth, async (req, res) => {
   const { nev, hossz, allomas, ido, vezetes, telepulesid } = req.body;
+
   const db = await openDb();
   await db.run(
     'INSERT INTO ut (nev, hossz, allomas, ido, vezetes, telepulesid) VALUES (?, ?, ?, ?, ?, ?)',
-    [nev, hossz || null, allomas || null, ido || null, (vezetes === '1' ? 1 : 0), telepulesid]
+    [
+      nev,
+      hossz || null,
+      allomas || null,
+      ido || null,
+      vezetes === '1' ? 1 : 0,
+      telepulesid,
+    ]
   );
-  res.redirect('/crud/ut');
+
+  res.redirect(BASE + '/crud/ut');
 });
 
-app.get('/crud/ut/:id/edit', ensureAuth, async (req, res) => {
+// CRUD edit
+app.get(BASE + '/crud/ut/:id/edit', ensureAuth, async (req, res) => {
   const db = await openDb();
   const ut = await db.get('SELECT * FROM ut WHERE id = ?', req.params.id);
-  if (!ut) return res.status(404).send('Nem talÃ¡lhatÃ³.');
-  const telepulesek = await db.all('SELECT id, nev FROM telepules ORDER BY nev');
-  res.render('crud/ut-form', { title: 'Ãšt szerkesztÃ©se â€“ TanÃ¶svÃ©ny', ut, telepulesek });
+
+  if (!ut) return res.status(404).send('Nem található.');
+
+  const telepulesek = await db.all(
+    'SELECT id, nev FROM telepules ORDER BY nev'
+  );
+
+  res.render('crud/ut-form', {
+    title: 'Út szerkesztése – Tanösvény',
+    ut,
+    telepulesek,
+  });
 });
 
-app.put('/crud/ut/:id', ensureAuth, async (req, res) => {
+// CRUD update
+app.put(BASE + '/crud/ut/:id', ensureAuth, async (req, res) => {
   const { nev, hossz, allomas, ido, vezetes, telepulesid } = req.body;
+
   const db = await openDb();
   await db.run(
     'UPDATE ut SET nev=?, hossz=?, allomas=?, ido=?, vezetes=?, telepulesid=? WHERE id=?',
-    [nev, hossz || null, allomas || null, ido || null, (vezetes === '1' ? 1 : 0), telepulesid, req.params.id]
+    [
+      nev,
+      hossz || null,
+      allomas || null,
+      ido || null,
+      vezetes === '1' ? 1 : 0,
+      telepulesid,
+      req.params.id,
+    ]
   );
-  res.redirect('/crud/ut');
+
+  res.redirect(BASE + '/crud/ut');
 });
 
-app.delete('/crud/ut/:id', ensureAuth, async (req, res) => {
+// CRUD delete
+app.delete(BASE + '/crud/ut/:id', ensureAuth, async (req, res) => {
   const db = await openDb();
   await db.run('DELETE FROM ut WHERE id = ?', req.params.id);
-  res.redirect('/crud/ut');
+
+  res.redirect(BASE + '/crud/ut');
 });
 
-// ---- 404
-app.use((req, res) => res.status(404).send('Az oldal nem talÃ¡lhatÃ³.'));
+// 404
+app.use((req, res) => {
+  res.status(404).send('Az oldal nem található.');
+});
 
+// Start
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Szerver fut: http://0.0.0.0:${PORT}`);
 });
-

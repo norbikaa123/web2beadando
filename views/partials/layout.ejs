@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
   <title><%= typeof title !== 'undefined' ? title : 'Tanösvény' %></title>
-  <link rel="stylesheet" href="/assets/css/main.css" />
+  <link rel="stylesheet" href="/app156/public/assets/css/main.css" />
 
   <style>
     header#header {
@@ -67,7 +67,7 @@
     }
   </style>
 
-  <noscript><link rel="stylesheet" href="/assets/css/noscript.css" /></noscript>
+  <noscript><link rel="stylesheet" href="/app156/public/assets/css/noscript.css" /></noscript>
 </head>
 
 <body class="is-preload">
@@ -80,30 +80,30 @@
         <div class="user-block">
           <% if (currentUser) { %>
             <span>Belépve: <strong><%= currentUser.name %></strong> (<%= currentUser.role %>)</span>
-            <form action="/logout" method="post" style="display:inline;">
+            <form action="/app156/logout" method="post" style="display:inline;">
               <button type="submit" class="button primary small">Kijelentkezés</button>
             </form>
           <% } else { %>
-            <a href="/login" class="button small">Bejelentkezés</a>
-            <a href="/register" class="button small">Regisztráció</a>
+            <a href="/app156/login" class="button small">Bejelentkezés</a>
+            <a href="/app156/register" class="button small">Regisztráció</a>
           <% } %>
         </div>
       </div>
 
-      <a href="/" class="logo"><strong>Tanösvény</strong> <span>projekt</span></a>
+      <a href="/app156/" class="logo"><strong>Tanösvény</strong> <span>projekt</span></a>
     </header>
 
     <nav id="menu">
       <ul class="links">
-        <li><a href="/">Főoldal</a></li>
-        <li><a href="/adatbazis">Adatbázis</a></li>
-        <li><a href="/kapcsolat">Kapcsolat</a></li>
+        <li><a href="/app156/">Főoldal</a></li>
+        <li><a href="/app156/adatbazis">Adatbázis</a></li>
+        <li><a href="/app156/kapcsolat">Kapcsolat</a></li>
         <% if (currentUser) { %>
-          <li><a href="/uzenetek">Üzenetek</a></li>
+          <li><a href="/app156/uzenetek">Üzenetek</a></li>
         <% } %>
-        <li><a href="/crud/ut">CRUD</a></li>
+        <li><a href="/app156/crud/ut">CRUD</a></li>
         <% if (currentUser && currentUser.role === 'admin') { %>
-          <li><a href="/admin">Admin</a></li>
+          <li><a href="/app156/admin">Admin</a></li>
         <% } %>
       </ul>
     </nav>
@@ -125,12 +125,12 @@
 
   </div>
 
-  <script src="/assets/js/jquery.min.js"></script>
-  <script src="/assets/js/jquery.scrolly.min.js"></script>
-  <script src="/assets/js/jquery.scrollex.min.js"></script>
-  <script src="/assets/js/browser.min.js"></script>
-  <script src="/assets/js/breakpoints.min.js"></script>
-  <script src="/assets/js/util.js"></script>
-  <script src="/assets/js/main.js"></script>
+  <script src="/app156/public/assets/js/jquery.min.js"></script>
+  <script src="/app156/public/assets/js/jquery.scrolly.min.js"></script>
+  <script src="/app156/public/assets/js/jquery.scrollex.min.js"></script>
+  <script src="/app156/public/assets/js/browser.min.js"></script>
+  <script src="/app156/public/assets/js/breakpoints.min.js"></script>
+  <script src="/app156/public/assets/js/util.js"></script>
+  <script src="/app156/public/assets/js/main.js"></script>
 </body>
 </html>

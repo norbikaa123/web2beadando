@@ -1,6 +1,6 @@
 <section class="inner">
   <header class="major"><h2>Útvonalak (CRUD)</h2></header>
-  <p><a href="/crud/ut/new" class="button primary">+ Új út hozzáadása</a></p>
+  <p><a href="/app156/crud/ut/new" class="button primary">+ Új út hozzáadása</a></p>
   <div class="table-wrapper">
     <table class="alt">
       <thead>
@@ -16,8 +16,8 @@
             <td><%= (u.vezetes === 1 ? 'van' : 'nincs') %></td>
             <td><%= u.telepules_nev %></td>
             <td>
-              <a href="/crud/ut/<%= u.id %>/edit" class="button small">Szerkesztés</a>
-              <form action="/crud/ut/<%= u.id %>?_method=DELETE" method="post" style="display:inline;">
+              <a href="/app156/crud/ut/<%= u.id %>/edit" class="button small">Szerkesztés</a>
+              <form action="/app156/crud/ut/<%= u.id %>?_method=DELETE" method="post" style="display:inline;">
                 <button type="submit" class="button small" onclick="return confirm('Biztosan törlöd?')">Törlés</button>
               </form>
             </td>

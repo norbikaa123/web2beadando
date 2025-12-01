@@ -1,6 +1,6 @@
 export function ensureAuth(req, res, next) {
   if (req.session && req.session.user) return next();
-  res.redirect('/login?next=' + encodeURIComponent(req.originalUrl || '/'));
+  res.redirect('/app156/login?next=' + encodeURIComponent(req.originalUrl || '/'));
 }
 
 export function ensureAdmin(req, res, next) {

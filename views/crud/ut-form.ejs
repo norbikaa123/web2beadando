@@ -1,6 +1,6 @@
 <section class="inner">
   <header class="major"><h2><%= title %></h2></header>
-  <form method="post" action="<%= (ut ? '/crud/ut/' + ut.id + '?_method=PUT' : '/crud/ut') %>">
+  <form method="post" action="<%= (ut ? '/app156/crud/ut/' + ut.id + '?_method=PUT' : '/app156/crud/ut') %>">
     <div class="row gtr-uniform">
       <div class="col-6 col-12-xsmall">
         <label>Név</label><input type="text" name="nev" value="<%= ut ? ut.nev : '' %>" required />
